@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
@@ -32,11 +32,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.angellira.whatsapp2.ui.theme.WhatsApp2Theme
 
+
+class ChatsListState(
+    val filters: List<String> = emptyList(),
+    val chats: List<Chat> = emptyList(),
+)
+
+data class Chat(
+    val id: String,
+    val avatar: String,
+    val name: String,
+    val lastMessage: Message,
+    val unreadMessage: Boolean = false,
+)
+
+data class Message(
+    val id: String,
+    val text: String,
+    val date: String,
+    val isRead: Boolean,
+)
+
 @Composable
-fun ChatsListScreen(modifier: Modifier = Modifier) {
-    LazyColumn(modifier.fillMaxSize(),
+fun ChatsListScreen(modifier: Modifier = Modifier, state: ChatsListState) {
+    LazyColumn(
+        modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
         //search textfields
         item {
             Row(
@@ -59,7 +82,7 @@ fun ChatsListScreen(modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val filters = remember { listOf("All", "Unread", "Groups") }
+                val filters = state.filters
                 filters.forEach { filter ->
                     Box(
                         modifier = Modifier
@@ -73,7 +96,7 @@ fun ChatsListScreen(modifier: Modifier = Modifier) {
             }
         }
 
-        items(12) {
+        items(state.chats) { chat ->
             val avatarSize = 60.dp
             Row(Modifier.fillMaxWidth()) {
                 Box(
@@ -86,8 +109,7 @@ fun ChatsListScreen(modifier: Modifier = Modifier) {
                 }
                 Spacer(Modifier.size(16.dp))
                 Column(
-                    Modifier
-                        .heightIn(avatarSize),
+                    Modifier.heightIn(avatarSize),
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Row(
@@ -130,6 +152,16 @@ fun ChatsListScreen(modifier: Modifier = Modifier) {
 @Composable
 fun ChatsListScreenPreview() {
     WhatsApp2Theme {
-        ChatsListScreen()
+        ChatsListScreen(
+            state = ChatsListState(
+                filters = listOf("All", "Unread", "Groups"), chats = listOf(
+                    Chat(
+                        id = "1", avatar = "", name = "Name", lastMessage = Message(
+                            id = "1", text = "last message", date = "12:00", isRead = false
+                        )
+                    )
+                )
+            )
+        )
     }
 }

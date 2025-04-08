@@ -40,7 +40,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.angellira.whatsapp2.features.chatsList.Chat
 import com.angellira.whatsapp2.features.chatsList.ChatsListScreen
+import com.angellira.whatsapp2.features.chatsList.ChatsListState
+import com.angellira.whatsapp2.features.chatsList.Message
 import com.angellira.whatsapp2.ui.theme.WhatsApp2Theme
 
 class MainActivity : ComponentActivity() {
@@ -164,7 +167,16 @@ private fun App() {
     }) { innerPadding ->
         HorizontalPager(pagerState, Modifier.padding(innerPadding)) { page ->
             when (screens[page]) {
-                is ScreenItem.Chats -> ChatsListScreen()
+                is ScreenItem.Chats -> ChatsListScreen(state = ChatsListState(
+                    filters = listOf("All", "Unread", "Groups"), chats = listOf(
+                        Chat(
+                            id = "1", avatar = "", name = "Name", lastMessage = Message(
+                                id = "1", text = "last message", date = "12:00", isRead = false
+                            )
+                        )
+                    )
+                )
+                )
                 is ScreenItem.Status -> UpdatesScreen()
                 is ScreenItem.Communities -> CommunitiesScreen()
                 is ScreenItem.Calls -> CallsScreen()
