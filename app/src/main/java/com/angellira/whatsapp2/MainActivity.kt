@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,20 +58,23 @@ class MainActivity : ComponentActivity() {
 sealed class NavItem(
     val icon: ImageVector,
     val label: String,
-){
-    data object Chats: NavItem(
+) {
+    data object Chats : NavItem(
         icon = Icons.AutoMirrored.Filled.Message,
         label = "Chats"
     )
-    data object Status: NavItem(
+
+    data object Status : NavItem(
         icon = Icons.Default.DataSaverOff,
         label = "Status"
     )
-    data object Communities: NavItem(
+
+    data object Communities : NavItem(
         icon = Icons.Default.People,
         label = "Communities"
     )
-    data object Calls: NavItem(
+
+    data object Calls : NavItem(
         icon = Icons.Default.Call,
         label = "Calls"
     )
@@ -90,6 +94,14 @@ private fun App() {
     }
     var selectedItem by remember { mutableStateOf(items.first()) }
     val pagerState = rememberPagerState { items.size }
+    LaunchedEffect(selectedItem) {
+        pagerState.animateScrollToPage(
+            items.indexOf(selectedItem)
+        )
+    }
+    LaunchedEffect(pagerState.targetPage) {
+        selectedItem = items[pagerState.targetPage]
+    }
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         TopAppBar(
             title = { Text("WhatsApp 2") },
@@ -105,31 +117,36 @@ private fun App() {
             )
 
     }, bottomBar = {
-        BottomAppBar {
-            items.forEach{ navItem ->
+        NavigationBar {
+            items.forEach { navItem ->
                 NavigationBarItem(
                     selected = navItem == selectedItem,
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        selectedItem = navItem
+                    },
+
                     icon = {
                         Icon(
                             imageVector = navItem.icon,
                             contentDescription = navItem.label,
                         )
-                }, label = { Text(navItem.label) })
+                    },
+                    label = { Text(navItem.label) }
+                )
             }
 
         }
-    }) { innerPadding ->
-        HorizontalPager(pagerState, Modifier.padding(innerPadding)) {
-            page ->
-            when (items[page]) {
-                is NavItem.Chats -> ChatsListScreen()
-                is NavItem.Status -> UpdatesScreen()
-                is NavItem.Communities -> CommunitiesScreen()
-                is NavItem.Calls -> CallsScreen()
-            }
+}) {
+    innerPadding ->
+    HorizontalPager(pagerState, Modifier.padding(innerPadding)) { page ->
+        when (items[page]) {
+            is NavItem.Chats -> ChatsListScreen()
+            is NavItem.Status -> UpdatesScreen()
+            is NavItem.Communities -> CommunitiesScreen()
+            is NavItem.Calls -> CallsScreen()
         }
     }
+}
 }
 
 
