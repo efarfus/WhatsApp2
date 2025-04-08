@@ -40,6 +40,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.angellira.whatsapp2.features.chatsList.ChatsListScreen
 import com.angellira.whatsapp2.ui.theme.WhatsApp2Theme
 
 class MainActivity : ComponentActivity() {
@@ -151,12 +152,11 @@ private fun App() {
                 with(screen.bottomAppItem) {
                     NavigationBarItem(selected = screen == currentScreen, onClick = {
                         currentScreen = screen
-                    },
-                        icon = {
-                            Icon(
-                                icon, label
-                            )
-                        }, label = { label })
+                    }, icon = {
+                        Icon(
+                            icon, label
+                        )
+                    }, label = { label })
                 }
             }
 
@@ -173,19 +173,6 @@ private fun App() {
     }
 }
 
-
-@Composable
-fun ChatsListScreen(modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize()) {
-        Text(
-            text = "Chats List",
-            modifier = Modifier.align(Alignment.Center),
-            style = TextStyle.Default.copy(
-                fontSize = 32.sp
-            )
-        )
-    }
-}
 
 @Composable
 fun UpdatesScreen(modifier: Modifier = Modifier) {
