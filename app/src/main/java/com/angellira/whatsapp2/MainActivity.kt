@@ -5,11 +5,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Call
@@ -51,31 +54,42 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class NavItem(
+sealed class NavItem(
     val icon: ImageVector,
     val label: String,
-)
+){
+    data object Chats: NavItem(
+        icon = Icons.AutoMirrored.Filled.Message,
+        label = "Chats"
+    )
+    data object Status: NavItem(
+        icon = Icons.Default.DataSaverOff,
+        label = "Status"
+    )
+    data object Communities: NavItem(
+        icon = Icons.Default.People,
+        label = "Communities"
+    )
+    data object Calls: NavItem(
+        icon = Icons.Default.Call,
+        label = "Calls"
+    )
+}
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 private fun App() {
     val items = remember {
         listOf(
-            NavItem(
-                icon = Icons.AutoMirrored.Filled.Message, label = "Chats"
-            ), NavItem(
-                icon = Icons.Default.DataSaverOff, label = "Status"
-            ),NavItem(
-                icon = Icons.Default.People, label = "Communities"
-            ),
-            NavItem(
-                icon = Icons.Default.Call, label = "Calls"
-            ),
-
+            NavItem.Chats,
+            NavItem.Status,
+            NavItem.Communities,
+            NavItem.Calls
         )
 
     }
     var selectedItem by remember { mutableStateOf(items.first()) }
+    val pagerState = rememberPagerState { items.size }
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         TopAppBar(
             title = { Text("WhatsApp 2") },
@@ -106,7 +120,15 @@ private fun App() {
 
         }
     }) { innerPadding ->
-        ChatsListScreen(Modifier.padding(innerPadding))
+        HorizontalPager(pagerState, Modifier.padding(innerPadding)) {
+            page ->
+            when (items[page]) {
+                is NavItem.Chats -> ChatsListScreen()
+                is NavItem.Status -> UpdatesScreen()
+                is NavItem.Communities -> CommunitiesScreen()
+                is NavItem.Calls -> CallsScreen()
+            }
+        }
     }
 }
 
@@ -116,6 +138,45 @@ fun ChatsListScreen(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize()) {
         Text(
             text = "Chats List",
+            modifier = Modifier.align(Alignment.Center),
+            style = TextStyle.Default.copy(
+                fontSize = 32.sp
+            )
+        )
+    }
+}
+
+@Composable
+fun UpdatesScreen(modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize()) {
+        Text(
+            text = "Updates",
+            modifier = Modifier.align(Alignment.Center),
+            style = TextStyle.Default.copy(
+                fontSize = 32.sp
+            )
+        )
+    }
+}
+
+@Composable
+fun CommunitiesScreen(modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize()) {
+        Text(
+            text = "Communities",
+            modifier = Modifier.align(Alignment.Center),
+            style = TextStyle.Default.copy(
+                fontSize = 32.sp
+            )
+        )
+    }
+}
+
+@Composable
+fun CallsScreen(modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize()) {
+        Text(
+            text = "Calls",
             modifier = Modifier.align(Alignment.Center),
             style = TextStyle.Default.copy(
                 fontSize = 32.sp
