@@ -1,5 +1,9 @@
 package com.angellira.whatsapp2.features.chatsList
 
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,148 +24,203 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.angellira.whatsapp2.ui.theme.WhatsApp2Theme
+import androidx.compose.ui.unit.sp
+import coil.compose.SubcomposeAsyncImage
+import kotlin.random.Random
 
-
-class ChatsListState(
-    val filters: List<String> = emptyList(),
-    val chats: List<Chat> = emptyList(),
-)
-
-data class Chat(
-    val id: String,
-    val avatar: String,
-    val name: String,
-    val lastMessage: Message,
-    val unreadMessage: Boolean = false,
-)
-
-data class Message(
-    val id: String,
-    val text: String,
-    val date: String,
-    val isRead: Boolean,
-)
 
 @Composable
 fun ChatsListScreen(modifier: Modifier = Modifier, state: ChatsListState) {
-    LazyColumn(
-        modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        //search textfields
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Default.Search, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Search...")
+    when (state) {
+        ChatsListState.Loading -> {
+            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
         }
 
-        item {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+        is ChatsListState.Sucess -> {
+            LazyColumn(
+                modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                val filters = state.filters
-                filters.forEach { filter ->
-                    Box(
+                item {
+                    Row(
                         modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
                             .clip(CircleShape)
                             .background(Color.Gray)
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = filter)
+                        Icon(Icons.Default.Search, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Search...")
                     }
                 }
-            }
-        }
 
-        items(state.chats) { chat ->
-            val avatarSize = 60.dp
-            Row(Modifier.fillMaxWidth()) {
-                Box(
-                    Modifier
-                        .clip(CircleShape)
-                        .background(Color.Gray)
-                        .size(avatarSize)
-                ) {
-
-                }
-                Spacer(Modifier.size(16.dp))
-                Column(
-                    Modifier.heightIn(avatarSize),
-                    verticalArrangement = Arrangement.Center,
-                ) {
+                item {
                     Row(
-                        Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "Name")
-
-                        Text(text = "Last message date")
+                        val filters = state.filters
+                        filters.forEach { filter ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.Gray)
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(text = filter)
+                            }
+                        }
                     }
-                    Row(
-                        Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(Modifier.weight(1f)) {
-                            Icon(Icons.Default.DoneAll, contentDescription = null)
-                            Spacer(Modifier.size(4.dp))
-                            Text(text = "last massage")
+                }
+
+                items(state.chats) { chat ->
+                    val avatarSize = 60.dp
+                    Row(Modifier.fillMaxWidth()) {
+                        if (chat.avatar.isBlank()) {
+                            Box(
+                                Modifier
+                                    .clip(CircleShape)
+                                    .background(
+                                        Color(
+                                            Random.nextInt(0, 255),
+                                            Random.nextInt(0, 255),
+                                            Random.nextInt(0, 255)
+                                        )
+                                    )
+                                    .size(avatarSize),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = chat.name.first().uppercase(),
+                                    color = Color.White,
+                                    fontSize = 24.sp
+                                )
+                            }
+                        } else {
+                            SubcomposeAsyncImage(
+                                model = chat.avatar,
+                                contentDescription = null,
+                                loading = {
+                                    Box(modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(CircleShape)
+                                        .shimmer()
+                                    )
+                                },
+                                modifier = Modifier
+                                    .size(avatarSize)
+                                    .clip(CircleShape)
+                            )
                         }
 
-                        Box(
-                            Modifier
-                                .clip(CircleShape)
-                                .background(Color.Green)
-                                .padding(8.dp, 4.dp)
+
+
+                        Spacer(Modifier.size(16.dp))
+                        Column(
+                            Modifier.heightIn(avatarSize),
+                            verticalArrangement = Arrangement.Center,
                         ) {
-                            Text(text = "99")
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    chat.name, Modifier.weight(1f), style = TextStyle.Default.copy(
+                                        fontSize = 18.sp, fontWeight = FontWeight.Bold
+                                    ), overflow = TextOverflow.Ellipsis, maxLines = 1
+                                )
+                                Spacer(Modifier.size(8.dp))
+                                Text(chat.lastMessage.date)
+                            }
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(Modifier.weight(1f)) {
+                                    if (state.currentUser != chat.lastMessage.author) {
+                                        Icon(Icons.Default.DoneAll, contentDescription = null)
+                                        Spacer(Modifier.size(4.dp))
+                                    }
+                                    Text(
+                                        text = chat.lastMessage.text,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1
+                                    )
+                                }
+                                Spacer(Modifier.size(8.dp))
+
+                                Box(
+                                    Modifier
+                                        .clip(CircleShape)
+                                        .size(30.dp)
+                                        .background(Color.Green)
+                                        .padding(4.dp)
+                                ) {
+                                    Text("${chat.unreadMessage}", Modifier.align(Alignment.Center))
+                                }
+
+                            }
                         }
 
                     }
                 }
-
             }
-        }
 
-        //chats filter
-        //chats list
+        }
     }
+
 }
 
-@Preview
 @Composable
-fun ChatsListScreenPreview() {
-    WhatsApp2Theme {
-        ChatsListScreen(
-            state = ChatsListState(
-                filters = listOf("All", "Unread", "Groups"), chats = listOf(
-                    Chat(
-                        id = "1", avatar = "", name = "Name", lastMessage = Message(
-                            id = "1", text = "last message", date = "12:00", isRead = false
-                        )
-                    )
-                )
+private fun Modifier.shimmer(
+    colors: List<Color> =
+        listOf(
+            Color.Gray.copy(alpha = 0.5f),
+            Color.Gray.copy(alpha = 0.1f),
+            Color.Gray.copy(alpha = 0.5f),
+        )
+): Modifier {
+    val infiniteTransition =
+        rememberInfiniteTransition(label = "infiniteTransation")
+    val localConfig = LocalConfiguration.current
+    val target = (localConfig.screenWidthDp * 3).toFloat()
+    val scale = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = target,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000)
+        ),
+        label = "shimmer"
+    )
+    return this.then(
+        Modifier.background(
+            Brush.linearGradient(
+                colors = colors,
+                end = Offset(x = scale.value, y = scale.value),
             )
         )
-    }
+    )
 }

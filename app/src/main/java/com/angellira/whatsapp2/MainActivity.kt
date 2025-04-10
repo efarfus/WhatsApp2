@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,13 +39,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.angellira.whatsapp2.features.chatsList.Chat
 import com.angellira.whatsapp2.features.chatsList.ChatsListScreen
 import com.angellira.whatsapp2.features.chatsList.ChatsListState
+import com.angellira.whatsapp2.features.chatsList.ChatsListViewModel
 import com.angellira.whatsapp2.features.chatsList.Message
+import com.angellira.whatsapp2.features.chatsList.User
 import com.angellira.whatsapp2.ui.theme.WhatsApp2Theme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,7 +165,8 @@ private fun App() {
                         Icon(
                             icon, label
                         )
-                    }, label = { label })
+                    },  label = { Text(label) }
+                    )
                 }
             }
 
@@ -167,19 +174,18 @@ private fun App() {
     }) { innerPadding ->
         HorizontalPager(pagerState, Modifier.padding(innerPadding)) { page ->
             when (screens[page]) {
-                is ScreenItem.Chats -> ChatsListScreen(state = ChatsListState(
-                    filters = listOf("All", "Unread", "Groups"), chats = listOf(
-                        Chat(
-                            id = "1", avatar = "", name = "Name", lastMessage = Message(
-                                id = "1", text = "last message", date = "12:00", isRead = false
-                            )
-                        )
+                is ScreenItem.Chats -> {
+                    val viewModel = viewModel<ChatsListViewModel>()
+                    val state by viewModel.state.collectAsState()
+                    ChatsListScreen(
+                        state = state
                     )
-                )
-                )
+                }
+
                 is ScreenItem.Status -> UpdatesScreen()
                 is ScreenItem.Communities -> CommunitiesScreen()
                 is ScreenItem.Calls -> CallsScreen()
+
             }
         }
     }
