@@ -39,18 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.angellira.whatsapp2.features.chatsList.Chat
 import com.angellira.whatsapp2.features.chatsList.ChatsListScreen
-import com.angellira.whatsapp2.features.chatsList.ChatsListState
 import com.angellira.whatsapp2.features.chatsList.ChatsListViewModel
-import com.angellira.whatsapp2.features.chatsList.Message
-import com.angellira.whatsapp2.features.chatsList.User
 import com.angellira.whatsapp2.ui.theme.WhatsApp2Theme
-import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,7 +159,7 @@ private fun App() {
                         Icon(
                             icon, label
                         )
-                    },  label = { Text(label) }
+                    }, label = { Text(label) }
                     )
                 }
             }

@@ -152,7 +152,8 @@ fun ChatsListScreen(modifier: Modifier = Modifier, state: ChatsListState) {
                                     ), overflow = TextOverflow.Ellipsis, maxLines = 1
                                 )
                                 Spacer(Modifier.size(8.dp))
-                                Text(chat.lastMessage.date)
+                                Text(text = chat.lastMessage.date)
+
                             }
                             Row(
                                 Modifier.fillMaxWidth(),
